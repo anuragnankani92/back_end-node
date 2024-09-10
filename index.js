@@ -62,3 +62,56 @@ const port = 3000;
 app.listen(port, ()=>{
     console.log(`Server is runnimg on port ${port}`)
 })
+
+app.get('/getUsers',async(req,res)=>{
+    try{
+        let result = await UserData.find({},'fname email');
+        if(!result){
+            console.log('User is Required')
+            res.status(404).json({ msg:'User is not Found' })
+        }
+        return res.status(200).json(result)
+
+    }catch(err){
+return res.status(500).json({ msg:'Server Error' })
+    }
+})
+
+app.delete('/deleteUsers/:id', async(req,res)=>{
+try{
+    const {id}=req.params;
+    console.log(id,'params id')
+    if(!id){
+        return res.status(400).json({ msg: 'ID is Required' })
+    }
+    const result = await UserData.findByIdAndDelete(id)
+    if(!result){
+        return res.status(404).json({ msg:'User Not Found' })
+    }
+    console.log('results',result)
+    return res.status(200).json({ msg: 'Data Deleted Successfully' })
+    
+}catch(err){
+    console.error('Server Error',err)
+}
+})
+
+app.delete('/deleteMyEmail',async (req,res)=>{
+try{
+    const {email}=req.body;
+    console.log(email,'email from body')
+    if(!email){
+        return res.status(400).json({ msg: 'Email is Required' })
+    }
+    const result = await UserData.findOneAndDelete({ email:email })
+    if(!result){
+        return res.status(404).json({ msg:' Email Not Found' })
+    }
+    return res.status(200).json({ msg:'User Deleted By Email' })
+
+}catch(err){
+    console.error('Failed to Delete User',err)
+
+}
+
+})
