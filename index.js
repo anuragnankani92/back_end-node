@@ -13,7 +13,6 @@ mongoose.connect("mongodb://127.0.0.1:27017/myfirstapi")
 })
 
 const UserSchema = new mongoose.Schema({
-
     fname: {
         type: String,
     },
@@ -58,14 +57,10 @@ app.post('/addUsers', async(req,res)=>{
 
 
 
-const port = 3000;
-app.listen(port, ()=>{
-    console.log(`Server is runnimg on port ${port}`)
-})
-
 app.get('/getUsers',async(req,res)=>{
     try{
-        let result = await UserData.find({},'fname email');
+        let result = await UserData.find({});
+        // let result = await UserData.find({},'fname email');
         if(!result){
             console.log('User is Required')
             res.status(404).json({ msg:'User is not Found' })
@@ -96,7 +91,7 @@ try{
 }
 })
 
-app.delete('/deleteMyEmail',async (req,res)=>{
+app.delete('/deleteByEmail',async (req,res)=>{
 try{
     const {email}=req.body;
     console.log(email,'email from body')
@@ -105,13 +100,49 @@ try{
     }
     const result = await UserData.findOneAndDelete({ email:email })
     if(!result){
-        return res.status(404).json({ msg:' Email Not Found' })
+        return res.status(404).json({ msg:' User Not Found' })
     }
     return res.status(200).json({ msg:'User Deleted By Email' })
 
 }catch(err){
     console.error('Failed to Delete User',err)
-
+    return res.status(500).json({ msg:'Server error' })
 }
+})
 
+app.put( '/updateUser/:id', async(req,res)=>{
+
+    const {id}=req.params;
+    const { fname, username, email, password } = req.body;
+
+    if(!id){
+        return res.status(400).json({ msg:'Id is Required' })
+    }
+
+    const updateData={}
+    if(fname) updateData.fname = fname;
+    if(username) updateData.username= username;
+    if(email) updateData.email = email;
+    if(password) updateData.password = password;
+
+try{
+
+    const result = await UserData.findByIdAndUpdate(
+        id,
+        { $set:updateData },
+        {new: true}
+    )
+    if(!result){
+        return res.status(404).json({ msg: 'user not found' })
+    }
+    return res.status(200).json({ msg: 'user updated successfully', data:result })
+}catch(err){
+    console.error('Server Error',err)
+}
+})
+
+
+const port = 3000;
+app.listen(port, ()=>{
+    console.log(`Server is runnimg on port ${port}`)
 })
