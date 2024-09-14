@@ -17,9 +17,14 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required:  true
     },
+    age:{
+        type: Number,
+        required: true
+    }
 }, {timestamps: true} )
 
 const UserData = mongoose.model('data',UserSchema)
 
-exports.model = UserData;
+// exports.model = UserData;
+module.exports = UserData;
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = require('./routes/userRoutes')
+const cors = require('cors')
 const app = express();
 app.use(express.json());
 
@@ -12,6 +13,12 @@ mongoose.connect("mongodb://127.0.0.1:27017/myfirstapi")
     console.log('Failed to Connect',err)
 })
 app.use(router)
+
+app.use(cors({
+    origin:true,
+    methods:['POST','GET','DELETE','PUT'],
+    credentials: true
+}))
 
 // const UserSchema = new mongoose.Schema({
 //     fname: {
@@ -172,5 +179,5 @@ app.use(router)
 
 const port = 3000;
 app.listen(port, ()=>{
-    console.log(`Server is runnimg on port ${port}`)
+    console.log(`Server is running on port ${port}`)
 })

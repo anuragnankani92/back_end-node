@@ -6,14 +6,15 @@ exports.addUsers = async(req,res)=>{
     try{
         const body = req.body;
 
-        if(!body || !body.fname || !body.username || !body.email || !body.password ){
+        if(!body || !body.fname || !body.username || !body.email || !body.password || !body.age){
             return res.status(400).json({ msg:"All Fields are Required" })
         }
         const result = await UserData.create({
             fname: body.fname,
             username: body.username,
             email: body.email,
-            password: body.password
+            password: body.password,
+            age:body.age
         })
         console.log('Result', result);
         res.status(200).json({ msg:'User is Successfully Registered'})
