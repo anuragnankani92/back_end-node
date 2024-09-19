@@ -1,6 +1,9 @@
 const UserData = require('../model/userSchema')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 // app.post('/addUsers',
+const SECRET_KEY = 'njuwgtmbgju87j6mklmbrt901bgqplkcz1ynhutdxcytdfcvbjhgfbjh'
 
 exports.addUsers = async(req,res)=>{
     try{
@@ -9,11 +12,13 @@ exports.addUsers = async(req,res)=>{
         if(!body || !body.fname || !body.username || !body.email || !body.password || !body.age){
             return res.status(400).json({ msg:"All Fields are Required" })
         }
+        let hashPassword = await bcrypt.hash(body.password,10)
+
         const result = await UserData.create({
             fname: body.fname,
             username: body.username,
             email: body.email,
-            password: body.password,
+            password: hashPassword,
             age:body.age
         })
         console.log('Result', result);
@@ -140,5 +145,31 @@ exports.updateByEmail = async(req,res)=>{
     }catch(err){
         console.error('Server Error',err)
     }
+
+}
+
+exports.loginUser= async(req,res)=>{
+    const { username,password } =req.body
+if(!username || !password){
+    return res.status(400).json({msg:'Username or Password is required'})
+}
+try{
+    const user = await UserData.findOne({ username })
+    if(!user){
+        return res.status(404).json({msg:'User not found'})
+    }
+    const validPassword = bcrypt.compare(password,user.password)
+    // const validPassword = password === user.password
+    if(!validPassword){
+        return res.status(401).json({ msg:'Invalid Password' })
+    }
+    const token= jwt.sign({id:user.id, username:user.username},SECRET_KEY,{
+        expiresIn:'1h'
+    })
+    return res.status(201).json({msg:'Login Successful',token})
+}catch(err){
+    return res.status(500).json({msg:'Server Error'})
+
+}
 
 }
